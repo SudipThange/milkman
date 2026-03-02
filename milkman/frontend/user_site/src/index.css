@@ -1,0 +1,48 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  font-family: "Manrope", sans-serif;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(circle at 16% 18%, rgba(140, 0, 255, 0.28), transparent 34%),
+    radial-gradient(circle at 82% 14%, rgba(255, 196, 0, 0.12), transparent 30%),
+    linear-gradient(118deg, #13002d 0%, #1f063d 38%, #2a1f3c 70%, #2f2f37 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  color: #fff7de;
+}
+
+.pm-page-gradient {
+  background:
+    radial-gradient(circle at 12% 24%, rgba(140, 0, 255, 0.24), transparent 36%),
+    radial-gradient(circle at 88% 6%, rgba(255, 196, 0, 0.1), transparent 28%),
+    linear-gradient(118deg, #14002f 0%, #200742 40%, #2a1f3d 72%, #313039 100%);
+  min-height: 100vh;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@layer utilities {
+  .p-5 {
+    padding: 1.5rem;
+  }
+}

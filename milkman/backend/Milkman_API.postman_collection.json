@@ -1,0 +1,533 @@
+{
+    "info": {
+        "name": "Milkman Backend API",
+        "description": "Postman collection for all API endpoints found in the Django backend.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "_postman_id": "5f8dfb9f-1f97-4bde-8f9a-2a493eeea4e2"
+    },
+    "variable": [{
+            "key": "baseUrl",
+            "value": "http://127.0.0.1:8000"
+        },
+        {
+            "key": "token",
+            "value": ""
+        },
+        {
+            "key": "userId",
+            "value": "1"
+        },
+        {
+            "key": "categoryId",
+            "value": "1"
+        },
+        {
+            "key": "productId",
+            "value": "1"
+        },
+        {
+            "key": "subscriptionId",
+            "value": "1"
+        },
+        {
+            "key": "subscriberId",
+            "value": "1"
+        },
+        {
+            "key": "orderId",
+            "value": "1"
+        },
+        {
+            "key": "orderItemId",
+            "value": "1"
+        }
+    ],
+    "item": [{
+            "name": "User",
+            "item": [{
+                    "name": "Register User",
+                    "request": {
+                        "method": "POST",
+                        "header": [{
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"username\": \"john\",\n  \"email\": \"john@example.com\",\n  \"password\": \"123456\",\n  \"age\": 25,\n  \"gender\": \"male\",\n  \"phone\": \"9876543210\",\n  \"address\": \"Some street\"\n}"
+                        },
+                        "url": "{{baseUrl}}/user/"
+                    }
+                },
+                {
+                    "name": "Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [{
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"123456\"\n}"
+                        },
+                        "url": "{{baseUrl}}/user/login/"
+                    },
+                    "event": [{
+                        "listen": "test",
+                        "script": {
+                            "type": "text/javascript",
+                            "exec": [
+                                "const data = pm.response.json();",
+                                "if (data.token) {",
+                                "  pm.collectionVariables.set('token', data.token);",
+                                "}"
+                            ]
+                        }
+                    }]
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "method": "POST",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [{
+                                "key": "token",
+                                "value": "{{token}}",
+                                "type": "string"
+                            }]
+                        },
+                        "url": "{{baseUrl}}/user/logout/"
+                    }
+                },
+                {
+                    "name": "List Users",
+                    "request": {
+                        "method": "GET",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [{
+                                "key": "token",
+                                "value": "{{token}}",
+                                "type": "string"
+                            }]
+                        },
+                        "url": "{{baseUrl}}/user/"
+                    }
+                },
+                {
+                    "name": "Get User By ID",
+                    "request": {
+                        "method": "GET",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [{
+                                "key": "token",
+                                "value": "{{token}}",
+                                "type": "string"
+                            }]
+                        },
+                        "url": "{{baseUrl}}/user/{{userId}}/"
+                    }
+                },
+                {
+                    "name": "Update User",
+                    "request": {
+                        "method": "PUT",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [{
+                                "key": "token",
+                                "value": "{{token}}",
+                                "type": "string"
+                            }]
+                        },
+                        "header": [{
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"username\": \"john_updated\",\n  \"email\": \"john_updated@example.com\",\n  \"password\": \"123456\",\n  \"age\": 26,\n  \"gender\": \"male\",\n  \"phone\": \"9876543210\",\n  \"address\": \"Updated address\"\n}"
+                        },
+                        "url": "{{baseUrl}}/user/{{userId}}/"
+                    }
+                },
+                {
+                    "name": "Delete User",
+                    "request": {
+                        "method": "DELETE",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [{
+                                "key": "token",
+                                "value": "{{token}}",
+                                "type": "string"
+                            }]
+                        },
+                        "url": "{{baseUrl}}/user/{{userId}}/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Category",
+            "item": [{
+                    "name": "List Categories",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/category/"
+                    }
+                },
+                {
+                    "name": "Create Category",
+                    "request": {
+                        "method": "POST",
+                        "header": [{
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Milk\",\n  \"description\": \"All milk products\"\n}"
+                        },
+                        "url": "{{baseUrl}}/category/"
+                    }
+                },
+                {
+                    "name": "Update Category",
+                    "request": {
+                        "method": "PUT",
+                        "header": [{
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Milk Updated\",\n  \"description\": \"Updated category\"\n}"
+                        },
+                        "url": "{{baseUrl}}/category/{{categoryId}}/"
+                    }
+                },
+                {
+                    "name": "Delete Category",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/category/{{categoryId}}/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Product",
+            "item": [{
+                    "name": "List Products",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/product/"
+                    }
+                },
+                {
+                    "name": "Create Product",
+                    "request": {
+                        "method": "POST",
+                        "header": [{
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Cow Milk\",\n  \"description\": \"Fresh milk\",\n  \"price\": \"55.00\",\n  \"category\": {{categoryId}}\n}"
+                        },
+                        "url": "{{baseUrl}}/product/"
+                    }
+                },
+                {
+                    "name": "Update Product",
+                    "request": {
+                        "method": "PUT",
+                        "header": [{
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Cow Milk Updated\",\n  \"description\": \"Fresh milk updated\",\n  \"price\": \"60.00\",\n  \"category\": {{categoryId}}\n}"
+                        },
+                        "url": "{{baseUrl}}/product/{{productId}}/"
+                    }
+                },
+                {
+                    "name": "Delete Product",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/product/{{productId}}/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Subscription",
+            "item": [{
+                    "name": "List Subscriptions",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/subscription/"
+                    }
+                },
+                {
+                    "name": "Create Subscription",
+                    "request": {
+                        "method": "POST",
+                        "header": [{
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Daily Milk Plan\",\n  \"desc\": \"Daily fresh milk delivery\",\n  \"quantity\": \"500ml\",\n  \"duration\": \"1m\",\n  \"price\": 1500\n}"
+                        },
+                        "url": "{{baseUrl}}/subscription/"
+                    }
+                },
+                {
+                    "name": "Get Subscription By ID",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/subscription/{{subscriptionId}}/"
+                    }
+                },
+                {
+                    "name": "Update Subscription",
+                    "request": {
+                        "method": "PUT",
+                        "header": [{
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Daily Milk Plan Updated\",\n  \"desc\": \"Updated plan\",\n  \"quantity\": \"1l\",\n  \"duration\": \"3m\",\n  \"price\": 4200\n}"
+                        },
+                        "url": "{{baseUrl}}/subscription/{{subscriptionId}}/"
+                    }
+                },
+                {
+                    "name": "Delete Subscription",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/subscription/{{subscriptionId}}/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Subscribers",
+            "item": [{
+                    "name": "List My Subscriptions",
+                    "request": {
+                        "method": "GET",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [{
+                                "key": "token",
+                                "value": "{{token}}",
+                                "type": "string"
+                            }]
+                        },
+                        "url": "{{baseUrl}}/subscribers/"
+                    }
+                },
+                {
+                    "name": "Create Subscriber",
+                    "request": {
+                        "method": "POST",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [{
+                                "key": "token",
+                                "value": "{{token}}",
+                                "type": "string"
+                            }]
+                        },
+                        "header": [{
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"subscription\": {{subscriptionId}},\n  \"subscription_date\": \"2026-02-28\"\n}"
+                        },
+                        "url": "{{baseUrl}}/subscribers/"
+                    }
+                },
+                {
+                    "name": "Get Subscriber By ID",
+                    "request": {
+                        "method": "GET",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [{
+                                "key": "token",
+                                "value": "{{token}}",
+                                "type": "string"
+                            }]
+                        },
+                        "url": "{{baseUrl}}/subscribers/{{subscriberId}}/"
+                    }
+                },
+                {
+                    "name": "Delete Subscriber",
+                    "request": {
+                        "method": "DELETE",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [{
+                                "key": "token",
+                                "value": "{{token}}",
+                                "type": "string"
+                            }]
+                        },
+                        "url": "{{baseUrl}}/subscribers/{{subscriberId}}/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Order",
+            "item": [{
+                    "name": "Create Order",
+                    "request": {
+                        "method": "POST",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [{
+                                "key": "token",
+                                "value": "{{token}}",
+                                "type": "string"
+                            }]
+                        },
+                        "header": [{
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"total_amount\": \"500.00\",\n  \"payment_method\": \"upi\"\n}"
+                        },
+                        "url": "{{baseUrl}}/order/"
+                    }
+                },
+                {
+                    "name": "Get Order By ID",
+                    "request": {
+                        "method": "GET",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [{
+                                "key": "token",
+                                "value": "{{token}}",
+                                "type": "string"
+                            }]
+                        },
+                        "url": "{{baseUrl}}/order/{{orderId}}/"
+                    }
+                },
+                {
+                    "name": "Update Order",
+                    "request": {
+                        "method": "PUT",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [{
+                                "key": "token",
+                                "value": "{{token}}",
+                                "type": "string"
+                            }]
+                        },
+                        "header": [{
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"payment_status\": \"success\",\n  \"order_status\": \"processing\",\n  \"transaction_id\": \"TXN123456\"\n}"
+                        },
+                        "url": "{{baseUrl}}/order/update/{{orderId}}/"
+                    }
+                },
+                {
+                    "name": "Delete Order",
+                    "request": {
+                        "method": "DELETE",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [{
+                                "key": "token",
+                                "value": "{{token}}",
+                                "type": "string"
+                            }]
+                        },
+                        "url": "{{baseUrl}}/order/delete/{{orderId}}/"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Order Item",
+            "item": [{
+                    "name": "List Order Items",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/order_item/order-items/"
+                    }
+                },
+                {
+                    "name": "Create Order Item",
+                    "request": {
+                        "method": "POST",
+                        "header": [{
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"order\": {{orderId}},\n  \"product\": {{productId}},\n  \"quantity\": 2\n}"
+                        },
+                        "url": "{{baseUrl}}/order_item/order-items/"
+                    }
+                },
+                {
+                    "name": "Get Order Item By ID",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/order_item/order-items/{{orderItemId}}/"
+                    }
+                },
+                {
+                    "name": "Update Order Item",
+                    "request": {
+                        "method": "PUT",
+                        "header": [{
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"order\": {{orderId}},\n  \"product\": {{productId}},\n  \"quantity\": 3\n}"
+                        },
+                        "url": "{{baseUrl}}/order_item/order-items/{{orderItemId}}/"
+                    }
+                },
+                {
+                    "name": "Delete Order Item",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/order_item/order-items/{{orderItemId}}/"
+                    }
+                }
+            ]
+        }
+    ]
+}
