@@ -6,7 +6,7 @@ export default function MainLayout() {
   const isHome = location.pathname === "/";
 
   return (
-    <div className={`${isHome ? "bg-offWhite" : "pm-page-gradient"} min-h-screen text-pmDeep`}>
+    <div className={`${isHome ? "bg-ivory-palace" : "pm-page-gradient"} min-h-screen text-royal-brown`}>
       <Navbar />
       <main className={isHome ? "h-[calc(100svh-74px)] overflow-hidden md:h-[calc(100svh-80px)]" : ""}>
         <Outlet />

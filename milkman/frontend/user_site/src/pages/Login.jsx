@@ -69,10 +69,10 @@ export default function Login() {
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-10 md:px-6">
-      <div className="overflow-hidden rounded-3xl border border-softGray bg-paperWhite shadow-soft">
+      <div className="overflow-hidden rounded-3xl border border-softGray/45 bg-paperWhite shadow-soft">
         <div className="grid min-h-[560px] grid-cols-1 md:grid-cols-2">
           <motion.div className="relative min-h-[280px] bg-deepDairyBlue p-8 md:min-h-full" layout transition={{ duration: 0.3 }}>
-            <div className="absolute inset-0 bg-milkBlue/22" />
+            <div className="absolute inset-0 bg-freshCoral/18" />
             <div className="relative z-10 flex h-full items-center justify-center text-center md:justify-start md:text-left">
               <div>
                 <AnimatePresence mode="wait" initial={false}>
@@ -115,7 +115,7 @@ export default function Login() {
                   onChange={(e) => setEmail(e.target.value)}
                   type="email"
                   placeholder="Email"
-                  className="w-full rounded-xl border border-softGray bg-white px-4 py-3 outline-none transition focus:border-milkBlue focus:ring-4 focus:ring-milkBlue/20"
+                  className="w-full rounded-xl border border-softGray/45 bg-paperWhite px-4 py-3 text-pmDeep outline-none transition focus:border-milkBlue focus:ring-4 focus:ring-milkBlue/25"
                   required
                 />
                 <input
@@ -123,7 +123,7 @@ export default function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                   type="password"
                   placeholder="Password"
-                  className="w-full rounded-xl border border-softGray bg-white px-4 py-3 outline-none transition focus:border-milkBlue focus:ring-4 focus:ring-milkBlue/20"
+                  className="w-full rounded-xl border border-softGray/45 bg-paperWhite px-4 py-3 text-pmDeep outline-none transition focus:border-milkBlue focus:ring-4 focus:ring-milkBlue/25"
                   required
                 />
               <AnimatePresence initial={false} mode="wait">
@@ -141,7 +141,7 @@ export default function Login() {
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       type="password"
                       placeholder="Confirm password"
-                      className="w-full rounded-xl border border-softGray bg-white px-4 py-3 outline-none transition focus:border-milkBlue focus:ring-4 focus:ring-milkBlue/20"
+                      className="w-full rounded-xl border border-softGray/45 bg-paperWhite px-4 py-3 text-pmDeep outline-none transition focus:border-milkBlue focus:ring-4 focus:ring-milkBlue/25"
                       required
                     />
                   </motion.div>
@@ -153,7 +153,7 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full rounded-xl bg-freshCoral py-3 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-freshCoral/90 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:bg-freshCoral"
+                  className="w-full rounded-xl bg-milkBlue py-3 font-semibold text-paperWhite transition hover:-translate-y-0.5 hover:bg-freshCoral disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:bg-milkBlue"
                 >
                   {isSubmitting ? "Please wait..." : mode === "login" ? "Login" : "Register"}
                 </button>
