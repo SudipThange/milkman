@@ -1,133 +1,359 @@
-# Milkman Backend (Django + DRF)
+# Milkman Full Stack Project
 
-A Django REST API for managing users, categories, products, subscriptions, and subscribers with stateless JWT authentication.
+Milkman is a full-stack subscription and ordering application with:
 
-## Features
+- Django + Django REST Framework backend (`milkman/backend`)
+- React + Vite admin frontend (`milkman/frontend/admin_site`)
+- React + Vite user frontend (`milkman/frontend/user_site`)
 
-- Email-based login that returns a JWT
-- Logout via token blacklist (revocation)
-- Subscriber endpoints scoped to the authenticated user
-- CRUD endpoints for Category, Product, Subscription
+The backend exposes APIs for users, products, categories, subscriptions, subscribers, orders, and order items, using custom stateless JWT authentication.
 
-## Prerequisites
+## Tech Stack
+
+### Backend
 
 - Python 3.11+
-- pip
-- Windows PowerShell or a Unix-like shell
+- Django 5.2.11
+- Django REST Framework 3.16.1
+- django-cors-headers 4.7.0
+- Pillow 11.3.0
+- SQLite (default: `milkman/backend/db.sqlite3`)
 
-## Quick Start (Windows)
+### Frontend
+
+- React 18
+- Vite 5
+- TailwindCSS (both frontends)
+- Bootstrap (admin site)
+
+## Repository Structure
+
+```text
+milkman/
+  backend/
+    config/           # Django settings, root urls, WSGI/ASGI
+    user/             # app user model, JWT auth/login/logout
+    category/         # category CRUD
+    product/          # product CRUD + image upload
+    subscription/     # subscription plan CRUD
+    subscribers/      # user subscription ownership + subscription checkout
+    order/            # order checkout/list/update/delete
+    order_item/       # individual order-item endpoints
+  frontend/
+    admin_site/       # admin React app
+    user_site/        # customer React app
+requirements.txt      # Python dependencies
+```
+
+## Quick Start
+
+### 1. Backend Setup (Windows PowerShell)
 
 ```powershell
-cd milkman/backend
+Set-Location D:\FullStackProject
 python -m venv .venv
-.\\.venv\\Scripts\\activate
-pip install Django==5.2.11 djangorestframework==3.16.1
+& .\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+Set-Location .\milkman\backend
 python manage.py migrate
 python manage.py runserver 0.0.0.0:8000
 ```
 
-Open http://localhost:8000/ in your browser.
+Backend base URL: `http://localhost:8000`
 
-## Quick Start (macOS/Linux)
+### 2. Backend Setup (macOS/Linux)
 
 ```bash
-cd milkman/backend
+cd /path/to/FullStackProject
 python3 -m venv .venv
 source .venv/bin/activate
-pip install Django==5.2.11 djangorestframework==3.16.1
+pip install -r requirements.txt
+cd milkman/backend
 python manage.py migrate
 python manage.py runserver 0.0.0.0:8000
 ```
 
-## Project Layout
+### 3. Run Frontend Apps
 
-- milkman/backend/config: Django project configuration (settings, urls, wsgi/asgi)
-- milkman/backend/user: Custom User model, JWT utils, auth, views, urls
-- milkman/backend/category: Category models, serializers, views, urls
-- milkman/backend/product: Product models, serializers, views, urls
-- milkman/backend/subscription: Subscription models, serializers, views, urls
-- milkman/backend/subscribers: Subscriber models, serializers, views, urls
+Admin site:
 
-## Authentication
+```powershell
+Set-Location D:\FullStackProject\milkman\frontend\admin_site
+npm install
+npm run dev
+```
 
-- Login uses email/password and returns a JWT (HS256)
-- Include the token in requests using header: `Authorization: Bearer <token>`
-- Logout adds the token’s `jti` to a blacklist
+User site:
 
-## API Endpoints
+```powershell
+Set-Location D:\FullStackProject\milkman\frontend\user_site
+npm install
+npm run dev
+```
 
-- User
-  - POST /user/ — create user
-  - POST /user/login/ — login with email/password, returns JWT
-  - POST /user/logout/ — logout (Bearer token required)
-  - GET /user/admin-users/ — list Django admin/staff users (for diagnostics)
-- Category
-  - GET/POST /category/
-  - GET/PUT/DELETE /category/<id>/
-- Product
-  - GET/POST /product/
-  - GET/PUT/DELETE /product/<id>/
-- Subscription
-  - GET/POST /subscription/
-  - GET/PUT/DELETE /subscription/<id>/
-- Subscribers (requires Authorization: Bearer <token>)
-  - GET/POST /subscribers/
-  - GET/DELETE /subscribers/<id>/
+## Authentication Model
 
-## Example Requests (curl)
+- Login endpoint: `POST /user/login/`
+- Returns JWT + mapped app `user_id`
+- Token is sent as: `Authorization: Bearer <token>`
+- DRF default auth class: `user.auth.JWTAuthentication`
+- Logout endpoint blacklists JWT `jti`: `POST /user/logout/`
+- Access token expiry: 60 minutes (from login implementation)
 
-Create a user:
-```bash
-curl -X POST "http://localhost:8000/user/" \
-  -H "Content-Type: application/json" \
-  -d '{"username":"alice","email":"alice@example.com","password":"secret123","age":30,"gender":"female","phone":"1234567890","address":"123 Street"}'
+Notes:
+
+- Login accepts either `email` or `username`.
+- If a Django staff/superuser logs in successfully, the backend maps that account to an app-level `user.User` record.
+
+## API Routing Overview
+
+Root routes from `config/urls.py`:
+
+- `/user/`
+- `/category/`
+- `/product/`
+- `/subscription/`
+- `/subscribers/`
+- `/order/`
+- `/order_item/`
+
+## Endpoint Reference
+
+### User
+
+- `GET /user/` list app users
+- `POST /user/` create app user
+- `GET /user/<id>/` retrieve user
+- `PUT /user/<id>/` update user
+- `DELETE /user/<id>/` delete user
+- `GET /user/admin-users/` list Django auth users
+- `POST /user/login/` login and receive JWT
+- `POST /user/logout/` revoke JWT (requires bearer token)
+
+### Category
+
+- `GET /category/`
+- `POST /category/`
+- `PUT /category/<id>/`
+- `DELETE /category/<id>/`
+
+### Product
+
+- `GET /product/`
+- `POST /product/` (supports multipart for image upload)
+- `PUT /product/<id>/`
+- `DELETE /product/<id>/`
+
+### Subscription
+
+- `GET /subscription/`
+- `POST /subscription/`
+- `GET /subscription/<id>/`
+- `PUT /subscription/<id>/`
+- `DELETE /subscription/<id>/`
+
+### Subscribers (Authenticated)
+
+- `GET /subscribers/` list own subscribers (admin/staff-mapped users can view all)
+- `POST /subscribers/` create subscriber for current user
+- `GET /subscribers/<id>/`
+- `PUT /subscribers/<id>/`
+- `DELETE /subscribers/<id>/`
+- `POST /subscribers/checkout/` mark one or more subscriber plans as paid and create order records
+
+### Orders (Authenticated)
+
+- `GET /order/` list orders
+- `POST /order/` create order using checkout payload
+- `GET /order/<id>/` retrieve order
+- `PUT /order/<id>/` partial update order
+- `DELETE /order/<id>/` delete order
+- `PUT /order/update/<id>/` update order (alternate route)
+- `DELETE /order/delete/<id>/` delete order (alternate route)
+
+### Order Items
+
+- `GET /order_item/`
+- `POST /order_item/`
+- `GET /order_item/<id>/`
+- `PUT /order_item/<id>/`
+- `DELETE /order_item/<id>/`
+
+## Example Payloads
+
+Create user:
+
+```json
+{
+  "username": "alice",
+  "email": "alice@example.com",
+  "password": "secret123",
+  "age": 27,
+  "gender": "female",
+  "phone": "9876543210",
+  "address": "Pune"
+}
 ```
 
 Login:
-```bash
-curl -X POST "http://localhost:8000/user/login/" \
-  -H "Content-Type: application/json" \
-  -d '{"email":"alice@example.com","password":"secret123"}'
-# Response: {"token":"<jwt>", "user_id":1}
+
+```json
+{
+  "email": "alice@example.com",
+  "password": "secret123"
+}
 ```
 
-Create a subscription:
-```bash
-curl -X POST "http://localhost:8000/subscription/" \
-  -H "Content-Type: application/json" \
-  -d '{"title":"Basic Plan","desc":"Milk subscription","quantity":10,"duration":30,"price":100}'
+Order checkout (`POST /order/`):
+
+```json
+{
+  "items": [
+    { "product_id": 1, "quantity": 2 },
+    { "product_id": 4, "quantity": 1 }
+  ],
+  "payment_method": "dummy_payment"
+}
 ```
 
-Create a subscriber (attach token from login):
-```bash
-TOKEN="<jwt>"
-SUB_ID="<subscription_id>"
-curl -X POST "http://localhost:8000/subscribers/" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -d "{\"subscription\": ${SUB_ID}}"
+Subscriber checkout (`POST /subscribers/checkout/`):
+
+```json
+{
+  "subscriber_ids": [3, 4],
+  "payment_method": "dummy_payment",
+  "payment_reference": "SUB-20260310-001"
+}
 ```
 
-List subscribers:
-```bash
-curl -X GET "http://localhost:8000/subscribers/" \
-  -H "Authorization: Bearer ${TOKEN}"
-```
+## Detailed Sequence Diagram
 
-Logout:
-```bash
-curl -X POST "http://localhost:8000/user/logout/" \
-  -H "Authorization: Bearer ${TOKEN}"
+```mermaid
+sequenceDiagram
+    autonumber
+    actor C as Client (Web/Mobile)
+    participant R as Django URL Router
+    participant UV as user.views (Login/Logout/User)
+    participant JA as JWTAuthentication
+    participant SV as subscribers.views
+    participant OV as order.views
+    participant OCS as OrderCheckoutSerializer
+    participant DB as SQLite DB
+
+    Note over C,DB: 1) Signup and Login
+    C->>R: POST /user/ (register app user)
+    R->>UV: UserView.post(request)
+    UV->>DB: INSERT user.User
+    DB-->>UV: created user
+    UV-->>C: 201 Created + user payload
+
+    C->>R: POST /user/login/ (email/username + password)
+    R->>UV: LoginView.post(request)
+    UV->>DB: SELECT app user by email/username
+    alt App user credentials valid
+        UV-->>UV: generate_jwt(user_id, exp=60m, jti)
+        UV-->>C: 200 OK + {token, user_id}
+    else App user invalid, check Django admin/staff
+        UV->>DB: SELECT auth user (is_staff/is_superuser)
+        alt Admin/staff valid
+            UV->>DB: UPSERT mapped app user.User
+            UV-->>UV: generate_jwt(mapped_user)
+            UV-->>C: 200 OK + {token, user_id}
+        else Invalid credentials
+            UV-->>C: 401 Unauthorized
+        end
+    end
+
+    Note over C,DB: 2) Authenticated product/order flow
+    C->>R: GET /product/ + Bearer token
+    R->>JA: authenticate(request)
+    JA->>DB: Validate token payload + user lookup + blacklist check
+    alt token valid and not blacklisted
+        JA-->>R: request.user + request.auth
+        R-->>C: 200 OK + products list
+    else token missing/invalid/revoked
+        JA-->>C: 401 Authentication Failed
+    end
+
+    C->>R: POST /order/ + Bearer token + items[]
+    R->>JA: authenticate(request)
+    JA->>DB: user + jti verification
+    JA-->>R: authenticated user
+    R->>OV: OrderListCreateAPIView.post()
+    OV->>OCS: validate(items, product_ids)
+    OCS->>DB: SELECT products by ids
+    alt all product ids valid
+        OCS-->>OCS: merge duplicate product rows
+        OCS-->>OCS: compute total_amount
+        OCS->>DB: INSERT order.Order (payment_status=success)
+        loop each merged item
+            OCS->>DB: INSERT order_item.OrderItem
+        end
+        OCS-->>OV: created order instance
+        OV-->>C: 201 Created + order + line items
+    else invalid product ids
+        OCS-->>OV: validation error
+        OV-->>C: 400 Bad Request
+    end
+
+    Note over C,DB: 3) Subscription enrollment and subscriber checkout
+    C->>R: POST /subscribers/ + Bearer token + subscription id
+    R->>JA: authenticate(request)
+    JA->>DB: verify token/user
+    JA-->>R: authenticated user
+    R->>SV: SubscriberListCreateAPIView.post()
+    SV->>DB: INSERT subscribers.Subscriber(user=request.user)
+    SV-->>C: 201 Created + subscriber
+
+    C->>R: POST /subscribers/checkout/ + subscriber_ids[]
+    R->>JA: authenticate(request)
+    JA->>DB: verify token/user
+    JA-->>R: authenticated user
+    R->>SV: SubscriberCheckoutAPIView.post()
+    SV->>DB: SELECT subscriber rows (+ subscription/user)
+    alt requested subscribers valid for actor
+        loop each subscriber
+            SV->>DB: check existing successful payment_orders
+            alt not paid yet
+                SV->>DB: INSERT order.Order linked to subscriber (completed/success)
+            else already paid
+                SV-->>SV: add subscriber id to skipped list
+            end
+        end
+        SV-->>C: 201 Created + paid_count + skipped_subscriber_ids + order_ids
+    else invalid subscriber ids
+        SV-->>C: 400 Bad Request
+    end
+
+    Note over C,DB: 4) Logout and token revocation
+    C->>R: POST /user/logout/ + Bearer token
+    R->>JA: authenticate(request)
+    JA->>DB: verify token and user
+    JA-->>R: request.auth contains jti
+    R->>UV: LogoutView.post()
+    UV->>DB: INSERT user.BlacklistedToken(jti)
+    UV-->>C: 200 OK Logged out
+
+    C->>R: Any protected endpoint with same token
+    R->>JA: authenticate(request)
+    JA->>DB: lookup jti in BlacklistedToken
+    JA-->>C: 401 Token has been revoked
 ```
 
 ## Development Notes
 
-- Settings module: `config.settings`
-- If models change, generate migrations and apply:
-  - `python manage.py makemigrations`
-  - `python manage.py migrate`
-- Default token expiry is 60 minutes
+- Media files are served in debug mode via `settings.MEDIA_URL` and `settings.MEDIA_ROOT`.
+- CORS is permissive in current development settings (`CORS_ALLOW_ALL_ORIGINS = True`).
+- If models change:
 
-## License
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
 
-BSD-3-Clause (Django and DRF are BSD-licensed)
+## Troubleshooting
+
+- `401 Invalid Authorization header`: ensure header format is exactly `Bearer <token>`.
+- `Token has been revoked`: login again to obtain a fresh token.
+- Product image URLs missing host: send requests with proper host and scheme so `image_url` is fully built.
+- `python` not found: activate the virtual environment first.
