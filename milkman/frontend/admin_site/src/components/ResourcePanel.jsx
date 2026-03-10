@@ -54,7 +54,9 @@ const STRICT_COLUMNS_BY_RESOURCE = {
   products: true,
   subscribers: true,
 };
-const ADDABLE_RESOURCE_KEYS = ["category", "products"];
+const ADDABLE_RESOURCE_KEYS = ["category", "products", "subscription"];
+const SUBSCRIPTION_QUANTITY_OPTIONS = ["250ml", "500ml", "750ml", "1L", "2L"];
+const SUBSCRIPTION_DURATION_OPTIONS = ["7d", "15d", "1m", "2m", "3m", "6m", "1y"];
 
 function isEditableField(key) {
   const blocked = ["id", "created_at", "modified_at", "order_id", "total_price", "price", "user", "password"];
@@ -76,6 +78,9 @@ function renderCellValue(value) {
 function getInitialCreatePayload(resourceKey) {
   if (resourceKey === "products") {
     return { name: "", quantity: "", description: "", price: "", category: "", image: null };
+  }
+  if (resourceKey === "subscription") {
+    return { title: "", desc: "", quantity: "", duration: "", price: "" };
   }
   if (resourceKey === "category") {
     return { name: "", description: "" };
@@ -268,7 +273,20 @@ export default function ResourcePanel({ selected, token }) {
     if (!canAddResource) return;
     setCreateError("");
 
-    if (!createPayload.name?.trim() || !createPayload.description?.trim()) {
+    if (effectiveResourceKey === "subscription") {
+      if (!createPayload.title?.trim() || !createPayload.desc?.trim()) {
+        setCreateError("Title and description are required.");
+        return;
+      }
+      if (!createPayload.quantity || !createPayload.duration) {
+        setCreateError("Quantity and duration are required.");
+        return;
+      }
+      if (createPayload.price === "" || Number(createPayload.price) < 0) {
+        setCreateError("Valid price is required.");
+        return;
+      }
+    } else if (!createPayload.name?.trim() || !createPayload.description?.trim()) {
       setCreateError("Name and description are required.");
       return;
     }
@@ -303,6 +321,14 @@ export default function ResourcePanel({ selected, token }) {
             image: createPayload.image,
           })
         );
+      } else if (effectiveResourceKey === "subscription") {
+        await createResource(config.path, token, {
+          title: createPayload.title.trim(),
+          desc: createPayload.desc.trim(),
+          quantity: createPayload.quantity,
+          duration: createPayload.duration,
+          price: Number(createPayload.price),
+        });
       } else {
         await createResource(config.path, token, {
           name: createPayload.name.trim(),
@@ -418,26 +444,93 @@ export default function ResourcePanel({ selected, token }) {
         <div className="modal-backdrop-custom">
           <div className="edit-modal">
             <h5 className="fw-bold mb-3">
-              Add {effectiveResourceKey === "products" ? "Product" : "Category"}
+              Add {effectiveResourceKey === "products" ? "Product" : effectiveResourceKey === "subscription" ? "Subscription Plan" : "Category"}
             </h5>
             <div className="d-flex flex-column gap-2 modal-form-scroll">
-              <div>
-                <label className="form-label small text-uppercase fw-semibold">Name</label>
-                <input
-                  className="form-control"
-                  value={createPayload.name ?? ""}
-                  onChange={(e) => onChangeCreateField("name", e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="form-label small text-uppercase fw-semibold">Description</label>
-                <textarea
-                  className="form-control"
-                  rows={3}
-                  value={createPayload.description ?? ""}
-                  onChange={(e) => onChangeCreateField("description", e.target.value)}
-                />
-              </div>
+              {effectiveResourceKey === "subscription" ? (
+                <>
+                  <div>
+                    <label className="form-label small text-uppercase fw-semibold">Title</label>
+                    <input
+                      className="form-control"
+                      value={createPayload.title ?? ""}
+                      onChange={(e) => onChangeCreateField("title", e.target.value)}
+                      placeholder="e.g. Weekly Milk Plan"
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label small text-uppercase fw-semibold">Description</label>
+                    <textarea
+                      className="form-control"
+                      rows={3}
+                      value={createPayload.desc ?? ""}
+                      onChange={(e) => onChangeCreateField("desc", e.target.value)}
+                      placeholder="Plan description"
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label small text-uppercase fw-semibold">Quantity</label>
+                    <select
+                      className="form-select"
+                      value={createPayload.quantity ?? ""}
+                      onChange={(e) => onChangeCreateField("quantity", e.target.value)}
+                    >
+                      <option value="">Select quantity</option>
+                      {SUBSCRIPTION_QUANTITY_OPTIONS.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="form-label small text-uppercase fw-semibold">Duration</label>
+                    <select
+                      className="form-select"
+                      value={createPayload.duration ?? ""}
+                      onChange={(e) => onChangeCreateField("duration", e.target.value)}
+                    >
+                      <option value="">Select duration</option>
+                      {SUBSCRIPTION_DURATION_OPTIONS.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="form-label small text-uppercase fw-semibold">Price</label>
+                    <input
+                      className="form-control"
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={createPayload.price ?? ""}
+                      onChange={(e) => onChangeCreateField("price", e.target.value)}
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="form-label small text-uppercase fw-semibold">Name</label>
+                    <input
+                      className="form-control"
+                      value={createPayload.name ?? ""}
+                      onChange={(e) => onChangeCreateField("name", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label small text-uppercase fw-semibold">Description</label>
+                    <textarea
+                      className="form-control"
+                      rows={3}
+                      value={createPayload.description ?? ""}
+                      onChange={(e) => onChangeCreateField("description", e.target.value)}
+                    />
+                  </div>
+                </>
+              )}
 
               {effectiveResourceKey === "products" ? (
                 <>

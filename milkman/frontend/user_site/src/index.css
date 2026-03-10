@@ -91,10 +91,24 @@ button {
         @apply rounded-full border border-royal-brown/20 bg-warm-parchment px-3 py-1 text-xs font-bold uppercase tracking-wide text-royal-brown;
     }
     .pm-carousel-wrap {
-        @apply relative overflow-visible rounded-xl border border-deep-saffron bg-milk-silk p-5;
+        @apply relative overflow-hidden rounded-xl border-2 border-deep-saffron bg-milk-silk p-5;
+        box-shadow: 0 10px 22px rgba(92, 58, 30, 0.1);
     }
     .pm-carousel-arrow {
         @apply absolute top-1/2 z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border shadow-lg backdrop-blur transition duration-300;
+    }
+    .pm-carousel-edge-shadow {
+        position: absolute;
+        top: 1.1rem;
+        right: 1rem;
+        bottom: 1.1rem;
+        width: 3.2rem;
+        pointer-events: none;
+        z-index: 5;
+        border-radius: 0;
+        background: linear-gradient(90deg, rgba(250, 246, 238, 0) 0%, rgba(250, 246, 238, 0.42) 58%, rgba(250, 246, 238, 0.9) 100%);
+        box-shadow: none;
+        transition: opacity 240ms ease;
     }
     .pm-btn-primary {
         @apply border border-deep-saffron bg-deep-saffron text-ivory-palace;

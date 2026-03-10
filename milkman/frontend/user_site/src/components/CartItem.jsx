@@ -21,7 +21,7 @@ export default function CartItem({
           aria-hidden="true"
           className="grid h-5 w-5 place-items-center rounded-md border-2 border-pmDeep/40 bg-white text-sm font-black leading-none text-transparent shadow-sm transition-all duration-200 peer-checked:border-pmViolet peer-checked:bg-pmViolet peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-pmViolet/50 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-white"
         >
-          ✓
+          &#10003;
         </span>
         Select
       </label>

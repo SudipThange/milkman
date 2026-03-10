@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { FiLogIn, FiRefreshCw, FiUserPlus } from "react-icons/fi";
 import { useLocation, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { loginRequest, registerRequest } from "../services/auth";
@@ -68,8 +69,8 @@ export default function Login() {
   };
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-10 md:px-6">
-      <div className="overflow-hidden rounded-3xl border border-softGray/45 bg-paperWhite shadow-soft">
+    <section className="mx-auto flex min-h-[calc(100svh-74px)] w-full max-w-6xl items-center px-4 py-6 md:min-h-[calc(100svh-80px)] md:px-6">
+      <div className="w-full overflow-hidden rounded-3xl border border-softGray/45 bg-paperWhite shadow-soft">
         <div className="grid min-h-[560px] grid-cols-1 md:grid-cols-2">
           <motion.div className="relative min-h-[280px] bg-deepDairyBlue p-8 md:min-h-full" layout transition={{ duration: 0.3 }}>
             <div className="absolute inset-0 bg-freshCoral/18" />
@@ -153,17 +154,19 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full rounded-xl bg-milkBlue py-3 font-semibold text-paperWhite transition hover:-translate-y-0.5 hover:bg-freshCoral disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:bg-milkBlue"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-milkBlue py-3 font-semibold text-paperWhite transition hover:-translate-y-0.5 hover:bg-freshCoral disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:bg-milkBlue"
                 >
+                  {mode === "login" ? <FiLogIn className="text-base" /> : <FiUserPlus className="text-base" />}
                   {isSubmitting ? "Please wait..." : mode === "login" ? "Login" : "Register"}
                 </button>
               </motion.form>
 
               <button
-                className="mt-4 text-sm text-pmDeep/75 underline"
+                className="mt-4 inline-flex items-center gap-1 text-sm text-pmDeep/75 underline"
                 type="button"
                 onClick={() => setMode((m) => (m === "login" ? "register" : "login"))}
               >
+                <FiRefreshCw className="text-sm" />
                 {mode === "login" ? "New user? Switch to Register" : "Already have an account? Switch to Login"}
               </button>
             </div>

@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { FiChevronLeft, FiChevronRight, FiRotateCcw } from "react-icons/fi";
 import ProductCard from "../components/ProductCard";
 import useAuth from "../hooks/useAuth";
 import useCart from "../hooks/useCart";
 import api from "../services/api";
 import logoImage from "../assets/image/logo.png";
+
+const PRODUCTS_PER_PAGE = 9;
 
 function resolveImageUrl(imagePath) {
   if (!imagePath) return logoImage;
@@ -34,6 +37,38 @@ function shuffleItems(items) {
   return shuffled;
 }
 
+function buildPageItems(currentPage, totalPages) {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const pages = new Set([1, totalPages, currentPage, currentPage - 1, currentPage + 1]);
+  if (currentPage <= 3) {
+    pages.add(2);
+    pages.add(3);
+    pages.add(4);
+  }
+  if (currentPage >= totalPages - 2) {
+    pages.add(totalPages - 1);
+    pages.add(totalPages - 2);
+    pages.add(totalPages - 3);
+  }
+
+  const sortedPages = [...pages].filter((page) => page >= 1 && page <= totalPages).sort((a, b) => a - b);
+  const items = [];
+  let previousPage = null;
+
+  sortedPages.forEach((page) => {
+    if (previousPage !== null && page - previousPage > 1) {
+      items.push("ellipsis");
+    }
+    items.push(page);
+    previousPage = page;
+  });
+
+  return items;
+}
+
 export default function Products() {
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
@@ -43,6 +78,7 @@ export default function Products() {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [priceBounds, setPriceBounds] = useState({ min: 0, max: 0 });
   const [priceRange, setPriceRange] = useState({ min: 0, max: 0 });
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -119,6 +155,36 @@ export default function Products() {
     });
   }, [products, shuffledProducts, selectedCategories, priceBounds.min, priceRange.max]);
 
+  const totalPages = useMemo(() => {
+    if (filteredProducts.length === 0) return 0;
+    return Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
+  }, [filteredProducts.length]);
+
+  const paginatedProducts = useMemo(() => {
+    if (filteredProducts.length === 0) return [];
+    const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+    return filteredProducts.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
+  }, [filteredProducts, currentPage]);
+
+  const pageItems = useMemo(() => {
+    if (totalPages <= 1) return [];
+    return buildPageItems(currentPage, totalPages);
+  }, [currentPage, totalPages]);
+
+  const pageStart = filteredProducts.length === 0 ? 0 : (currentPage - 1) * PRODUCTS_PER_PAGE + 1;
+  const pageEnd = Math.min(currentPage * PRODUCTS_PER_PAGE, filteredProducts.length);
+  const showingRangeLabel = filteredProducts.length === 0 ? "0" : `${pageStart}-${pageEnd}`;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategories, priceRange.max]);
+
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   const handleCategoryToggle = (categoryName) => {
     setSelectedCategories((previous) =>
       previous.includes(categoryName)
@@ -187,8 +253,9 @@ export default function Products() {
                   clearCategorySelection();
                   resetPriceRange();
                 }}
-                className="text-xs font-semibold uppercase tracking-wide text-pmViolet hover:text-pmDeep"
+                className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-pmViolet hover:text-pmDeep"
               >
+                <FiRotateCcw className="text-sm" aria-hidden="true" />
                 Clear All
               </button>
             </div>
@@ -211,8 +278,11 @@ export default function Products() {
                         type="checkbox"
                         checked={checked}
                         onChange={() => handleCategoryToggle(categoryName)}
-                        className="h-4 w-4 rounded border-pmDeep/40 text-pmViolet focus:ring-pmViolet"
+                        className="peer sr-only"
                       />
+                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-lg border border-pmViolet/35 bg-white/80 text-sm font-bold leading-none text-transparent transition peer-checked:border-pmViolet peer-checked:bg-pmViolet peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-pmViolet/35 peer-focus-visible:ring-offset-1">
+                        &#10003;
+                      </span>
                       <span className="font-medium">{categoryName}</span>
                     </label>
                   );
@@ -259,7 +329,11 @@ export default function Products() {
           <div className="space-y-4">
             <div className="pm-shell flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm font-semibold text-pmDeep/75">
-                Showing <span className="text-pmDeep">{filteredProducts.length}</span> products
+                Showing{" "}
+                <span className="text-pmDeep">
+                  {showingRangeLabel}
+                </span>{" "}
+                of <span className="text-pmDeep">{filteredProducts.length}</span> products
               </p>
               <p className="text-xs font-semibold uppercase tracking-wide text-pmViolet">
                 {selectedCategories.length === 0 ? "All categories shuffled" : "Filtered by category"}
@@ -272,13 +346,66 @@ export default function Products() {
               </div>
             ) : (
               <div className="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                {filteredProducts.map((product) => (
+                {paginatedProducts.map((product) => (
                   <div key={product.id}>
                     <ProductCard product={product} onAddToCart={handleAddToCart} />
                   </div>
                 ))}
               </div>
             )}
+
+            {totalPages > 1 ? (
+              <div className="pm-shell flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm font-semibold text-pmDeep/80">
+                  Page <span className="text-pmDeep">{currentPage}</span> of{" "}
+                  <span className="text-pmDeep">{totalPages}</span>
+                </p>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((previous) => Math.max(previous - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="inline-flex h-10 items-center gap-1 rounded-xl border border-pmDeep/20 bg-white/70 px-3 text-sm font-semibold text-pmDeep transition hover:border-pmViolet/60 hover:bg-white disabled:cursor-not-allowed disabled:opacity-45"
+                  >
+                    <FiChevronLeft className="text-base" aria-hidden="true" />
+                    Prev
+                  </button>
+
+                  {pageItems.map((item, index) =>
+                    item === "ellipsis" ? (
+                      <span key={`ellipsis-${index}`} className="px-1 text-sm font-semibold text-pmDeep/55">
+                        ...
+                      </span>
+                    ) : (
+                      <button
+                        key={`page-${item}`}
+                        type="button"
+                        onClick={() => setCurrentPage(item)}
+                        className={`inline-flex h-10 min-w-10 items-center justify-center rounded-xl border text-sm font-semibold transition ${
+                          item === currentPage
+                            ? "border-pmViolet bg-pmViolet text-white shadow-soft"
+                            : "border-pmDeep/20 bg-white/70 text-pmDeep hover:border-pmViolet/60 hover:bg-white"
+                        }`}
+                        aria-current={item === currentPage ? "page" : undefined}
+                      >
+                        {item}
+                      </button>
+                    )
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((previous) => Math.min(previous + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="inline-flex h-10 items-center gap-1 rounded-xl border border-pmDeep/20 bg-white/70 px-3 text-sm font-semibold text-pmDeep transition hover:border-pmViolet/60 hover:bg-white disabled:cursor-not-allowed disabled:opacity-45"
+                  >
+                    Next
+                    <FiChevronRight className="text-base" aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       ) : null}

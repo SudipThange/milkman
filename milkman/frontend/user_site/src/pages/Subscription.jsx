@@ -223,8 +223,8 @@ export default function Subscription() {
           disabled={!canScrollLeft}
           className={`pm-carousel-arrow left-3 ${
             canScrollLeft
-              ? "border-pmGold/60 bg-pmDeep/95 text-white hover:scale-105 hover:bg-pmViolet"
-              : "cursor-not-allowed border-white/20 bg-pmDeep/45 text-white/40"
+              ? "border-white/90 bg-pmDeep text-white hover:scale-105 hover:bg-pmViolet"
+              : "cursor-not-allowed border-white/50 bg-pmDeep/50 text-white/50"
           }`}
           aria-label="previous subscriptions"
         >
@@ -236,8 +236,8 @@ export default function Subscription() {
           disabled={!canScrollRight}
           className={`pm-carousel-arrow right-3 ${
             canScrollRight
-              ? "border-pmGold/60 bg-pmDeep/95 text-white hover:scale-105 hover:bg-pmViolet"
-              : "cursor-not-allowed border-white/20 bg-pmDeep/45 text-white/40"
+              ? "border-white/90 bg-pmDeep text-white hover:scale-105 hover:bg-pmViolet"
+              : "cursor-not-allowed border-white/50 bg-pmDeep/50 text-white/50"
           }`}
           aria-label="next subscriptions"
         >
@@ -270,6 +270,11 @@ export default function Subscription() {
             </div>
           ))}
         </div>
+
+        <div
+          className={`pm-carousel-edge-shadow ${canScrollRight ? "opacity-100" : "opacity-0"}`}
+          aria-hidden="true"
+        />
       </div>
     </section>
   );
