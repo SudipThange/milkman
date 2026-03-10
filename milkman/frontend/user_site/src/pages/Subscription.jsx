@@ -29,6 +29,9 @@ export default function Subscription() {
 
   const subscribedPlanIdSet = new Set(subscribedPlanIds);
   const pendingPlanIdSet = new Set(pendingPlanIds);
+  const skeletonCards = [0, 1, 2];
+  const canSlideLeft = canScrollLeft && !loading;
+  const canSlideRight = canScrollRight && !loading;
 
   const getSlideAmount = () => {
     if (!trackRef.current) return 0;
@@ -195,86 +198,104 @@ export default function Subscription() {
   };
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-10 md:px-6">
-      <header className="pm-shell mb-6 p-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="pm-section-title">Subscriptions</h1>
-            <p className="pm-section-subtitle">Choose a plan that fits your routine.</p>
+    <section className="px-4 py-10 md:px-6">
+      <div className="mx-auto w-full max-w-6xl">
+        <header className="pm-shell mb-6 p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="pm-section-title">Subscriptions</h1>
+              <p className="pm-section-subtitle">Choose a plan that fits your routine.</p>
+            </div>
           </div>
+        </header>
+
+        {actionError ? (
+          <div className="mb-4 rounded-2xl border border-red-300 bg-red-100/90 px-4 py-3 text-sm text-red-900">
+            {actionError}
+          </div>
+        ) : null}
+
+        {actionSuccess ? (
+          <div className="mb-4 rounded-2xl border border-emerald-300 bg-emerald-100/90 px-4 py-3 text-sm text-emerald-900">
+            {actionSuccess}
+          </div>
+        ) : null}
+
+        <div className="pm-carousel-wrap">
+          <button
+            onClick={slideLeft}
+            disabled={!canSlideLeft}
+            className={`pm-carousel-arrow left-3 ${
+              canSlideLeft
+                ? "border-white/90 bg-pmDeep text-white hover:scale-105 hover:bg-pmViolet"
+                : "cursor-not-allowed border-white/50 bg-pmDeep/50 text-white/50"
+            }`}
+            aria-label="previous subscriptions"
+          >
+            <FiChevronLeft className="text-lg" />
+          </button>
+
+          <button
+            onClick={slideRight}
+            disabled={!canSlideRight}
+            className={`pm-carousel-arrow right-3 ${
+              canSlideRight
+                ? "border-white/90 bg-pmDeep text-white hover:scale-105 hover:bg-pmViolet"
+                : "cursor-not-allowed border-white/50 bg-pmDeep/50 text-white/50"
+            }`}
+            aria-label="next subscriptions"
+          >
+            <FiChevronRight className="text-lg" />
+          </button>
+
+          <div
+            ref={trackRef}
+            onWheel={handleWheel}
+            className="flex snap-x snap-mandatory gap-5 overflow-x-auto overflow-y-visible px-9 py-3 scrollbar-hide"
+          >
+            {loading
+              ? skeletonCards.map((index) => (
+                  <div
+                    key={`subscription-skeleton-${index}`}
+                    className="snap-start basis-[85%] sm:basis-[48%] lg:basis-[39%] shrink-0"
+                  >
+                    <article className="pm-card-base flex h-full flex-col gap-4 border-softGray bg-paperWhite p-6">
+                      <span className="pm-skeleton-line h-7 w-32 rounded-lg" />
+                      <span className="pm-skeleton-line h-6 w-10 rounded-full self-end" />
+                      <span className="pm-skeleton-line h-10 w-4/5 rounded-xl" />
+                      <div className="space-y-2">
+                        <span className="pm-skeleton-line block h-4 w-full rounded-md" />
+                        <span className="pm-skeleton-line block h-4 w-11/12 rounded-md" />
+                      </div>
+                      <div className="space-y-2">
+                        <span className="pm-skeleton-line block h-4 w-2/3 rounded-md" />
+                        <span className="pm-skeleton-line block h-4 w-3/4 rounded-md" />
+                      </div>
+                      <span className="pm-skeleton-line mt-auto block h-10 w-full rounded-xl" />
+                    </article>
+                  </div>
+                ))
+              : plans.map((item) => (
+                  <div
+                    key={item.id}
+                    className="snap-start basis-[85%] sm:basis-[48%] lg:basis-[39%] shrink-0"
+                  >
+                    <SubscriptionCard
+                      item={item}
+                      onSubscribe={subscribedPlanIdSet.has(item.id) || pendingPlanIdSet.has(item.id) ? undefined : handleSubscribe}
+                      isSubmitting={submittingPlanId === item.id}
+                      isSubscribed={subscribedPlanIdSet.has(item.id)}
+                      isPending={pendingPlanIdSet.has(item.id)}
+                    />
+                  </div>
+                ))}
+          </div>
+
+          <div
+            className={`pm-carousel-edge-shadow ${canSlideRight ? "opacity-100" : "opacity-0"}`}
+            aria-hidden="true"
+          />
         </div>
-      </header>
-
-      {actionError ? (
-        <div className="mb-4 rounded-2xl border border-red-300 bg-red-100/90 px-4 py-3 text-sm text-red-900">
-          {actionError}
-        </div>
-      ) : null}
-
-      {actionSuccess ? (
-        <div className="mb-4 rounded-2xl border border-emerald-300 bg-emerald-100/90 px-4 py-3 text-sm text-emerald-900">
-          {actionSuccess}
-        </div>
-      ) : null}
-
-      <div className="pm-carousel-wrap">
-        <button
-          onClick={slideLeft}
-          disabled={!canScrollLeft}
-          className={`pm-carousel-arrow left-3 ${
-            canScrollLeft
-              ? "border-white/90 bg-pmDeep text-white hover:scale-105 hover:bg-pmViolet"
-              : "cursor-not-allowed border-white/50 bg-pmDeep/50 text-white/50"
-          }`}
-          aria-label="previous subscriptions"
-        >
-          <FiChevronLeft className="text-lg" />
-        </button>
-
-        <button
-          onClick={slideRight}
-          disabled={!canScrollRight}
-          className={`pm-carousel-arrow right-3 ${
-            canScrollRight
-              ? "border-white/90 bg-pmDeep text-white hover:scale-105 hover:bg-pmViolet"
-              : "cursor-not-allowed border-white/50 bg-pmDeep/50 text-white/50"
-          }`}
-          aria-label="next subscriptions"
-        >
-          <FiChevronRight className="text-lg" />
-        </button>
-
-        <div
-          ref={trackRef}
-          onWheel={handleWheel}
-          className="flex snap-x snap-mandatory gap-5 overflow-x-auto overflow-y-visible px-9 py-3 scrollbar-hide"
-        >
-          {loading ? (
-            <div className="w-full rounded-2xl border border-white/45 bg-white/65 p-8 text-center text-pmDeep/70">
-              Loading plans...
-            </div>
-          ) : null}
-
-          {!loading && plans.map((item) => (
-            <div
-              key={item.id}
-              className="snap-start basis-[85%] sm:basis-[48%] lg:basis-[39%] shrink-0"
-            >
-              <SubscriptionCard
-                item={item}
-                onSubscribe={subscribedPlanIdSet.has(item.id) || pendingPlanIdSet.has(item.id) ? undefined : handleSubscribe}
-                isSubmitting={submittingPlanId === item.id}
-                isSubscribed={subscribedPlanIdSet.has(item.id)}
-                isPending={pendingPlanIdSet.has(item.id)}
-              />
-            </div>
-          ))}
-        </div>
-
-        <div
-          className={`pm-carousel-edge-shadow ${canScrollRight ? "opacity-100" : "opacity-0"}`}
-          aria-hidden="true"
-        />
       </div>
     </section>
   );
