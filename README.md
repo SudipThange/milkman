@@ -8,6 +8,13 @@ Milkman is a full-stack subscription and ordering application with:
 
 The backend exposes APIs for users, products, categories, subscriptions, subscribers, orders, and order items, using custom stateless JWT authentication.
 
+## API Documentation
+
+- Swagger UI: `http://localhost:8000/swagger/`
+- OpenAPI schema (JSON): `http://localhost:8000/api/schema/`
+- ReDoc: `http://localhost:8000/redoc/`
+- Postman collection: `milkman/backend/Milkman_API.postman_collection.json`
+
 ## Tech Stack
 
 ### Backend
@@ -108,6 +115,10 @@ Notes:
 ## API Routing Overview
 
 Root routes from `config/urls.py`:
+
+- `/api/schema/`
+- `/swagger/`
+- `/redoc/`
 
 - `/user/`
 - `/category/`
@@ -226,118 +237,80 @@ Subscriber checkout (`POST /subscribers/checkout/`):
 }
 ```
 
-## Detailed Sequence Diagram
+## Frontend API Flows
+
+### user_site API flow
+
+- User registers or logs in using `/user/` and `/user/login/`.
+- Client stores JWT and calls protected APIs with `Authorization: Bearer <token>`.
+- User browses products/subscriptions, creates subscriber plans, checks out subscriptions, and places product orders.
+- User can logout via `/user/logout/`, which revokes the token.
 
 ```mermaid
 sequenceDiagram
-    autonumber
-    actor C as Client (Web/Mobile)
-    participant R as Django URL Router
-    participant UV as user.views (Login/Logout/User)
-    participant JA as JWTAuthentication
-    participant SV as subscribers.views
-    participant OV as order.views
-    participant OCS as OrderCheckoutSerializer
-    participant DB as SQLite DB
+  autonumber
+  actor U as user_site
+  participant API as Django API
+  participant Auth as JWT auth
+  participant DB as SQLite
 
-    Note over C,DB: 1) Signup and Login
-    C->>R: POST /user/ (register app user)
-    R->>UV: UserView.post(request)
-    UV->>DB: INSERT user.User
-    DB-->>UV: created user
-    UV-->>C: 201 Created + user payload
+  U->>API: POST /user/login/
+  API->>DB: validate credentials
+  API-->>U: JWT token
 
-    C->>R: POST /user/login/ (email/username + password)
-    R->>UV: LoginView.post(request)
-    UV->>DB: SELECT app user by email/username
-    alt App user credentials valid
-        UV-->>UV: generate_jwt(user_id, exp=60m, jti)
-        UV-->>C: 200 OK + {token, user_id}
-    else App user invalid, check Django admin/staff
-        UV->>DB: SELECT auth user (is_staff/is_superuser)
-        alt Admin/staff valid
-            UV->>DB: UPSERT mapped app user.User
-            UV-->>UV: generate_jwt(mapped_user)
-            UV-->>C: 200 OK + {token, user_id}
-        else Invalid credentials
-            UV-->>C: 401 Unauthorized
-        end
-    end
+  U->>API: GET /product/ and GET /subscription/
+  API-->>U: catalog data
 
-    Note over C,DB: 2) Authenticated product/order flow
-    C->>R: GET /product/ + Bearer token
-    R->>JA: authenticate(request)
-    JA->>DB: Validate token payload + user lookup + blacklist check
-    alt token valid and not blacklisted
-        JA-->>R: request.user + request.auth
-        R-->>C: 200 OK + products list
-    else token missing/invalid/revoked
-        JA-->>C: 401 Authentication Failed
-    end
+  U->>API: POST /subscribers/ (Bearer token)
+  API->>Auth: verify token
+  Auth->>DB: resolve user
+  API->>DB: create subscriber
+  API-->>U: subscriber created
 
-    C->>R: POST /order/ + Bearer token + items[]
-    R->>JA: authenticate(request)
-    JA->>DB: user + jti verification
-    JA-->>R: authenticated user
-    R->>OV: OrderListCreateAPIView.post()
-    OV->>OCS: validate(items, product_ids)
-    OCS->>DB: SELECT products by ids
-    alt all product ids valid
-        OCS-->>OCS: merge duplicate product rows
-        OCS-->>OCS: compute total_amount
-        OCS->>DB: INSERT order.Order (payment_status=success)
-        loop each merged item
-            OCS->>DB: INSERT order_item.OrderItem
-        end
-        OCS-->>OV: created order instance
-        OV-->>C: 201 Created + order + line items
-    else invalid product ids
-        OCS-->>OV: validation error
-        OV-->>C: 400 Bad Request
-    end
+  U->>API: POST /order/ (Bearer token)
+  API->>Auth: verify token
+  API->>DB: create order and order items
+  API-->>U: order response
 
-    Note over C,DB: 3) Subscription enrollment and subscriber checkout
-    C->>R: POST /subscribers/ + Bearer token + subscription id
-    R->>JA: authenticate(request)
-    JA->>DB: verify token/user
-    JA-->>R: authenticated user
-    R->>SV: SubscriberListCreateAPIView.post()
-    SV->>DB: INSERT subscribers.Subscriber(user=request.user)
-    SV-->>C: 201 Created + subscriber
+  U->>API: POST /user/logout/ (Bearer token)
+  API->>DB: blacklist token jti
+  API-->>U: logged out
+```
 
-    C->>R: POST /subscribers/checkout/ + subscriber_ids[]
-    R->>JA: authenticate(request)
-    JA->>DB: verify token/user
-    JA-->>R: authenticated user
-    R->>SV: SubscriberCheckoutAPIView.post()
-    SV->>DB: SELECT subscriber rows (+ subscription/user)
-    alt requested subscribers valid for actor
-        loop each subscriber
-            SV->>DB: check existing successful payment_orders
-            alt not paid yet
-                SV->>DB: INSERT order.Order linked to subscriber (completed/success)
-            else already paid
-                SV-->>SV: add subscriber id to skipped list
-            end
-        end
-        SV-->>C: 201 Created + paid_count + skipped_subscriber_ids + order_ids
-    else invalid subscriber ids
-        SV-->>C: 400 Bad Request
-    end
+### admin_site API flow
 
-    Note over C,DB: 4) Logout and token revocation
-    C->>R: POST /user/logout/ + Bearer token
-    R->>JA: authenticate(request)
-    JA->>DB: verify token and user
-    JA-->>R: request.auth contains jti
-    R->>UV: LogoutView.post()
-    UV->>DB: INSERT user.BlacklistedToken(jti)
-    UV-->>C: 200 OK Logged out
+- Admin logs in from `admin_site` using `/user/login/` with staff/superuser credentials.
+- Backend maps admin identity to app user and issues JWT.
+- Admin dashboard manages resources via CRUD APIs:
+  - categories: `/category/`
+  - products: `/product/`
+  - subscriptions: `/subscription/`
+  - users/orders/subscribers: `/user/`, `/order/`, `/subscribers/`
+- Admin can review and update operational records, then logout.
 
-    C->>R: Any protected endpoint with same token
-    R->>JA: authenticate(request)
-    JA->>DB: lookup jti in BlacklistedToken
-    JA-->>C: 401 Token has been revoked
+```mermaid
+sequenceDiagram
+  autonumber
+  actor A as admin_site
+  participant API as Django API
+  participant UserAPI as /user/login/
+  participant CoreAPI as category/product/subscription/order/subscribers
+  participant DB as SQLite
+
+  A->>UserAPI: POST /user/login/ (admin credentials)
+  UserAPI->>DB: validate staff/superuser and map app user
+  UserAPI-->>A: JWT token
+
+  A->>CoreAPI: GET resource lists
+  CoreAPI-->>A: dashboard data
+
+  A->>CoreAPI: POST/PUT/DELETE resource actions
+  CoreAPI->>DB: apply CRUD changes
+  CoreAPI-->>A: success response
+
+  A->>API: POST /user/logout/
+  API->>DB: blacklist token jti
+  API-->>A: logged out
 ```
 
 ## Development Notes
