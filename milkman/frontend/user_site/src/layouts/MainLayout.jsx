@@ -1,5 +1,4 @@
-import { Outlet } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
 export default function MainLayout() {
@@ -7,9 +6,9 @@ export default function MainLayout() {
   const isHome = location.pathname === "/";
 
   return (
-    <div className="pm-page-gradient min-h-screen text-pmDeep">
+    <div className={`${isHome ? "bg-offWhite" : "pm-page-gradient"} min-h-screen text-pmDeep`}>
       <Navbar />
-      <main className={isHome ? "pt-0" : "pt-20"}>
+      <main className={isHome ? "h-[calc(100svh-74px)] overflow-hidden md:h-[calc(100svh-80px)]" : ""}>
         <Outlet />
       </main>
     </div>

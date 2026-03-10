@@ -196,11 +196,11 @@ export default function Subscription() {
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-10 md:px-6">
-      <header className="mb-6 rounded-3xl border border-white/45 bg-white/45 p-6 shadow-soft backdrop-blur-md">
+      <header className="pm-shell mb-6 p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold">Subscriptions</h1>
-            <p className="mt-2 text-pmDeep/75">Choose a plan that fits your routine.</p>
+            <h1 className="pm-section-title">Subscriptions</h1>
+            <p className="pm-section-subtitle">Choose a plan that fits your routine.</p>
           </div>
         </div>
       </header>
@@ -217,11 +217,11 @@ export default function Subscription() {
         </div>
       ) : null}
 
-      <div className="relative overflow-visible rounded-3xl border border-white/45 bg-white/40 p-5 shadow-soft backdrop-blur-md">
+      <div className="pm-carousel-wrap">
         <button
           onClick={slideLeft}
           disabled={!canScrollLeft}
-          className={`absolute left-3 top-1/2 z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border shadow-lg backdrop-blur transition duration-300 ${
+          className={`pm-carousel-arrow left-3 ${
             canScrollLeft
               ? "border-pmGold/60 bg-pmDeep/95 text-white hover:scale-105 hover:bg-pmViolet"
               : "cursor-not-allowed border-white/20 bg-pmDeep/45 text-white/40"
@@ -234,7 +234,7 @@ export default function Subscription() {
         <button
           onClick={slideRight}
           disabled={!canScrollRight}
-          className={`absolute right-3 top-1/2 z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border shadow-lg backdrop-blur transition duration-300 ${
+          className={`pm-carousel-arrow right-3 ${
             canScrollRight
               ? "border-pmGold/60 bg-pmDeep/95 text-white hover:scale-105 hover:bg-pmViolet"
               : "cursor-not-allowed border-white/20 bg-pmDeep/45 text-white/40"

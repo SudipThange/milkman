@@ -32,7 +32,7 @@ const COLUMN_ORDER_BY_RESOURCE = {
     "date_joined",
   ],
   category: ["id", "name", "description"],
-  products: ["id", "name", "description", "price", "category", "created_at", "updated_at"],
+  products: ["id", "name", "quantity", "description", "price", "category", "image", "created_at", "updated_at"],
   subscription: ["id", "title", "desc", "quantity", "duration", "price", "created_at", "modified_at"],
   subscribers: ["user_name", "subscription_title", "subscription_date", "due_date"],
   orders: [
@@ -75,12 +75,25 @@ function renderCellValue(value) {
 
 function getInitialCreatePayload(resourceKey) {
   if (resourceKey === "products") {
-    return { name: "", description: "", price: "", category: "" };
+    return { name: "", quantity: "", description: "", price: "", category: "", image: null };
   }
   if (resourceKey === "category") {
     return { name: "", description: "" };
   }
   return {};
+}
+
+function buildProductFormData(payload) {
+  const formData = new FormData();
+  formData.append("name", (payload.name || "").trim());
+  formData.append("quantity", (payload.quantity || "").trim());
+  formData.append("description", (payload.description || "").trim());
+  formData.append("price", payload.price ?? "");
+  formData.append("category", String(payload.category ?? ""));
+  if (payload.image instanceof File) {
+    formData.append("image", payload.image);
+  }
+  return formData;
 }
 
 export default function ResourcePanel({ selected, token }) {
@@ -205,7 +218,19 @@ export default function ResourcePanel({ selected, token }) {
   const onSaveEdit = async () => {
     if (!editingItem) return;
     try {
-      await updateResource(config.path, editingItem.id, token, editPayload);
+      if (effectiveResourceKey === "products") {
+        const payload = {
+          name: editPayload.name,
+          quantity: editPayload.quantity,
+          description: editPayload.description,
+          price: editPayload.price,
+          category: editPayload.category,
+          image: editPayload.image,
+        };
+        await updateResource(config.path, editingItem.id, token, buildProductFormData(payload));
+      } else {
+        await updateResource(config.path, editingItem.id, token, editPayload);
+      }
       setEditingItem(null);
       await loadItems();
     } catch (err) {
@@ -249,8 +274,16 @@ export default function ResourcePanel({ selected, token }) {
     }
 
     if (effectiveResourceKey === "products") {
+      if (!createPayload.quantity?.trim()) {
+        setCreateError("Quantity is required.");
+        return;
+      }
       if (createPayload.price === "" || !createPayload.category) {
         setCreateError("Price and category are required.");
+        return;
+      }
+      if (!(createPayload.image instanceof File)) {
+        setCreateError("Product image is required.");
         return;
       }
     }
@@ -258,12 +291,18 @@ export default function ResourcePanel({ selected, token }) {
     setIsCreating(true);
     try {
       if (effectiveResourceKey === "products") {
-        await createResource(config.path, token, {
-          name: createPayload.name.trim(),
-          description: createPayload.description.trim(),
-          price: createPayload.price,
-          category: Number(createPayload.category),
-        });
+        await createResource(
+          config.path,
+          token,
+          buildProductFormData({
+            name: createPayload.name,
+            quantity: createPayload.quantity,
+            description: createPayload.description,
+            price: createPayload.price,
+            category: Number(createPayload.category),
+            image: createPayload.image,
+          })
+        );
       } else {
         await createResource(config.path, token, {
           name: createPayload.name.trim(),
@@ -403,6 +442,15 @@ export default function ResourcePanel({ selected, token }) {
               {effectiveResourceKey === "products" ? (
                 <>
                   <div>
+                    <label className="form-label small text-uppercase fw-semibold">Quantity</label>
+                    <input
+                      className="form-control"
+                      value={createPayload.quantity ?? ""}
+                      onChange={(e) => onChangeCreateField("quantity", e.target.value)}
+                      placeholder="e.g. 500 ml, 1 L, 250 g"
+                    />
+                  </div>
+                  <div>
                     <label className="form-label small text-uppercase fw-semibold">Price</label>
                     <input
                       className="form-control"
@@ -431,6 +479,15 @@ export default function ResourcePanel({ selected, token }) {
                       <small className="text-secondary">No categories available. Add a category first.</small>
                     ) : null}
                   </div>
+                  <div>
+                    <label className="form-label small text-uppercase fw-semibold">Image</label>
+                    <input
+                      className="form-control"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => onChangeCreateField("image", e.target.files?.[0] || null)}
+                    />
+                  </div>
                 </>
               ) : null}
             </div>
@@ -457,12 +514,21 @@ export default function ResourcePanel({ selected, token }) {
               {Object.entries(editPayload).map(([key, value]) => (
                 <div key={key}>
                   <label className="form-label small text-uppercase fw-semibold">{key}</label>
-                  <input
-                    className="form-control"
-                    value={value ?? ""}
-                    disabled={!isEditableField(key)}
-                    onChange={(e) => onEditChange(key, e.target.value)}
-                  />
+                  {effectiveResourceKey === "products" && key === "image" ? (
+                    <input
+                      className="form-control"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => onEditChange("image", e.target.files?.[0] || value)}
+                    />
+                  ) : (
+                    <input
+                      className="form-control"
+                      value={value ?? ""}
+                      disabled={!isEditableField(key)}
+                      onChange={(e) => onEditChange(key, e.target.value)}
+                    />
+                  )}
                 </div>
               ))}
             </div>

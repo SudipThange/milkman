@@ -69,9 +69,18 @@ export default function Cart() {
   };
 
   return (
-    <section className="mx-auto grid max-w-7xl gap-6 px-4 py-10 md:grid-cols-3 md:px-6">
-      <div className="space-y-4 md:col-span-2">
-        <h1 className="text-4xl font-bold text-white">Your Cart</h1>
+    <section className="mx-auto max-w-7xl space-y-5 px-4 py-10 md:px-6">
+      <header className="rounded-3xl border border-white/45 bg-white/45 p-6 shadow-soft backdrop-blur-md">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div>
+            <h1 className="text-4xl font-bold text-pmDeep">Your Cart</h1>
+            <p className="mt-2 text-pmDeep/75">Review your selected products and checkout in one click.</p>
+          </div>
+        </div>
+      </header>
+
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_350px]">
+      <div className="space-y-4">
 
         {checkoutMessage ? (
           <div className="rounded-2xl border border-emerald-300 bg-emerald-100/90 p-4 text-sm text-emerald-900">
@@ -89,26 +98,28 @@ export default function Cart() {
         ) : null}
 
         {items.length === 0 ? (
-          <div className="rounded-2xl border border-white/45 bg-white/50 p-10 text-center text-pmDeep/75 shadow-soft backdrop-blur-md">
+          <div className="pm-shell p-10 text-center text-pmDeep/75">
             Your cart is empty. Add products to continue.
           </div>
         ) : (
-          items.map((item) => (
-            <CartItem
-              key={item.id}
-              item={item}
-              checked={isItemSelected(item.id)}
-              onToggleSelection={setItemSelected}
-              onIncrease={() => changeQty(item.id, 1)}
-              onDecrease={() => changeQty(item.id, -1)}
-              onRemove={() => removeItem(item.id)}
-            />
-          ))
+          <div className="space-y-3">
+            {items.map((item) => (
+              <CartItem
+                key={item.id}
+                item={item}
+                checked={isItemSelected(item.id)}
+                onToggleSelection={setItemSelected}
+                onIncrease={() => changeQty(item.id, 1)}
+                onDecrease={() => changeQty(item.id, -1)}
+                onRemove={() => removeItem(item.id)}
+              />
+            ))}
+          </div>
         )}
       </div>
 
-      <aside className="rounded-2xl border border-white/45 bg-white/50 p-5 shadow-md backdrop-blur-md md:sticky md:top-24 md:h-fit">
-        <h2 className="text-2xl font-bold">Order Summary</h2>
+      <aside className="pm-shell p-5 md:sticky md:top-24 md:h-fit lg:p-6">
+        <h2 className="text-4xl font-bold text-pmDeep">Order Summary</h2>
         <div className="mt-4 space-y-2 text-sm text-pmDeep/70">
           <div className="flex justify-between">
             <span>Cart Items</span>
@@ -120,22 +131,22 @@ export default function Cart() {
           </div>
           <div className="flex justify-between">
             <span>Subtotal</span>
-            <span>INR {selectedSubtotal}</span>
+            <span>Rs {selectedSubtotal}</span>
           </div>
           <div className="flex justify-between">
             <span>Delivery</span>
-            <span>INR {delivery}</span>
+            <span>Rs {delivery}</span>
           </div>
         </div>
         <div className="mt-4 border-t pt-4">
-          <p className="flex justify-between text-lg font-bold">
+          <p className="flex justify-between text-3xl font-bold text-pmDeep">
             <span>Total</span>
-            <span>INR {checkoutTotal}</span>
+            <span>Rs {checkoutTotal}</span>
           </p>
         </div>
 
         <Button
-          className="mt-5 w-full bg-pmDeep text-white hover:bg-pmViolet disabled:cursor-not-allowed disabled:opacity-60"
+          className="pm-btn-primary mt-5 w-full disabled:cursor-not-allowed disabled:opacity-60"
           onClick={handleCheckout}
           disabled={isCheckingOut || selectedItems.length === 0}
         >
@@ -144,7 +155,7 @@ export default function Cart() {
 
         {items.length > 0 ? (
           <Button
-            className="mt-3 w-full bg-pmAccent/30 text-pmDeep hover:bg-pmAccent/50"
+            className="mt-3 w-full border border-pmAccent/45 bg-pmAccent/28 text-pmDeep hover:bg-pmAccent/45"
             onClick={clear}
             disabled={isCheckingOut}
           >
@@ -152,6 +163,7 @@ export default function Cart() {
           </Button>
         ) : null}
       </aside>
+      </div>
     </section>
   );
 }

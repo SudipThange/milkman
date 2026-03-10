@@ -1,48 +1,131 @@
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
-
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 * {
-  font-family: "Manrope", sans-serif;
+    font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+:root {
+    --milk-blue: #2e8bc0;
+    --milk-blue-light: #e3f3fb;
+    --deep-dairy-blue: #1b4f72;
+    --pastel-cream: #fff5e2;
+    --fresh-coral: #ff8559;
+    --farm-green: #4caf50;
+    --off-white: #f9fafb;
+    --paper-white: #ffffff;
+    --soft-gray: #e5e7eb;
+    --charcoal: #111827;
+    --cool-gray: #6b7280;
 }
 
 html,
 body,
 #root {
-  min-height: 100%;
+    min-height: 100%;
 }
 
 body {
-  background:
-    radial-gradient(circle at 16% 18%, rgba(140, 0, 255, 0.28), transparent 34%),
-    radial-gradient(circle at 82% 14%, rgba(255, 196, 0, 0.12), transparent 30%),
-    linear-gradient(118deg, #13002d 0%, #1f063d 38%, #2a1f3c 70%, #2f2f37 100%);
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-  color: #fff7de;
+    background: var(--off-white);
+    color: var(--charcoal);
+}
+
+a,
+button {
+    -webkit-tap-highlight-color: transparent;
 }
 
 .pm-page-gradient {
-  background:
-    radial-gradient(circle at 12% 24%, rgba(140, 0, 255, 0.24), transparent 36%),
-    radial-gradient(circle at 88% 6%, rgba(255, 196, 0, 0.1), transparent 28%),
-    linear-gradient(118deg, #14002f 0%, #200742 40%, #2a1f3d 72%, #313039 100%);
-  min-height: 100vh;
+    background: radial-gradient(circle at 8% 12%, rgba(46, 139, 192, 0.16), transparent 32%), radial-gradient(circle at 92% 6%, rgba(255, 133, 89, 0.12), transparent 28%), linear-gradient(135deg, #f9fafb 0%, #eef6fb 48%, #fff9ef 100%);
+    min-height: 100vh;
 }
 
 .scrollbar-hide::-webkit-scrollbar {
-  display: none;
+    display: none;
 }
 
 .scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+@layer components {
+    .pm-shell {
+        @apply rounded-xl border border-softGray bg-paperWhite;
+    }
+    .pm-section-title {
+        @apply text-4xl font-bold tracking-tight text-charcoal;
+    }
+    .pm-section-subtitle {
+        @apply mt-2 text-sm text-coolGray;
+    }
+    .pm-nav-link {
+        @apply relative inline-flex items-center px-1 pb-1 text-base font-semibold text-pmDeep/80 transition duration-200;
+        font-family: "Sora", sans-serif;
+        isolation: isolate;
+    }
+    .pm-nav-link:hover {
+        @apply text-pmDeep;
+    }
+    .pm-nav-link::after {
+        content: "";
+        @apply pointer-events-none absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-freshCoral;
+        transition: width 280ms ease;
+    }
+    .pm-nav-link:hover::after,
+    .pm-nav-link.active::after {
+        @apply w-full;
+    }
+    .pm-card-base {
+        @apply h-full rounded-xl border border-softGray bg-paperWhite p-6 transition duration-200;
+    }
+    .pm-card-base:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    .pm-product-card {
+        backdrop-filter: none;
+        will-change: transform;
+        contain: layout paint;
+        content-visibility: auto;
+        contain-intrinsic-size: 430px;
+        transition: transform 220ms ease, box-shadow 220ms ease;
+    }
+    .pm-chip {
+        @apply rounded-full border border-pmDeep/20 bg-milkBlueLight px-3 py-1 text-xs font-bold uppercase tracking-wide text-pmDeep;
+    }
+    .pm-carousel-wrap {
+        @apply relative overflow-visible rounded-xl border border-softGray bg-paperWhite p-5;
+    }
+    .pm-carousel-arrow {
+        @apply absolute top-1/2 z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border shadow-lg backdrop-blur transition duration-300;
+    }
+    .pm-btn-primary {
+        @apply border border-freshCoral bg-freshCoral text-paperWhite;
+    }
+    .pm-btn-secondary {
+        @apply border border-milkBlue bg-milkBlueLight text-pmDeep;
+    }
+    .pm-btn-primary:hover {
+        @apply bg-freshCoral/90;
+    }
+    .pm-btn-secondary:hover {
+        @apply bg-pastelCream;
+    }
+}
+
+@media (min-width: 768px) {
+    .pm-section-title {
+        @apply text-5xl;
+    }
+    .pm-section-subtitle {
+        @apply text-base;
+    }
 }
 
 @layer utilities {
-  .p-5 {
-    padding: 1.5rem;
-  }
+    .p-5 {
+        padding: 1.5rem;
+    }
 }

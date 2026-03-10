@@ -139,14 +139,14 @@ export default function Orders() {
                       <p className="font-semibold text-pmDeep">{item.product_name}</p>
                       <p className="text-xs text-pmDeep/60">Qty: {item.quantity}</p>
                     </div>
-                    <p className="font-semibold text-pmDeep">INR {item.total_price}</p>
+                    <p className="font-semibold text-pmDeep">Rs {item.total_price}</p>
                   </div>
                 ))}
               </div>
 
               <div className="mt-4 flex items-center justify-between border-t border-pmDeep/10 pt-4">
                 <p className="text-sm text-pmDeep/70">Transaction: {order.transaction_id || "N/A"}</p>
-                <p className="text-lg font-bold text-pmDeep">INR {order.total_amount}</p>
+                <p className="text-lg font-bold text-pmDeep">Rs {order.total_amount}</p>
               </div>
             </article>
           ))}

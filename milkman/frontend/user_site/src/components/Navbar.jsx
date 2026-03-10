@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { FiLogOut, FiMenu, FiShoppingCart, FiX } from "react-icons/fi";
 import Button from "./Button";
@@ -18,22 +18,23 @@ const baseNavItems = [
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [useFallbackLogo, setUseFallbackLogo] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const { isLoggedIn, logout } = useAuth();
   const { count } = useCart();
   const location = useLocation();
   const navigate = useNavigate();
   const navItems = baseNavItems;
 
-  const headerClasses =
-    "bg-gradient-to-r from-pmDeep/96 via-[#5a248f]/95 to-[#7f5a7a]/95 border-b border-pmGold/30 shadow-[0_8px_24px_rgba(28,6,58,0.45)] backdrop-blur-xl";
-  const brandText = "text-white";
-  const subtitleText = "text-white/80";
-  const navText = "text-white/85";
-  const navActiveText = "text-white";
-  const underlineColor = "bg-pmGold";
-  const actionBtn = "border border-white/45 bg-white/10 text-white backdrop-blur hover:bg-white/20";
-  const ordersBtn = "border border-white/45 bg-white/10 text-white backdrop-blur hover:bg-white/20";
-  const cartBtn = "relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/50 bg-white/10 text-white hover:bg-white/20";
+  const headerClasses = isScrolled
+    ? "overflow-hidden border-b border-softGray bg-paperWhite"
+    : "overflow-hidden border-b border-softGray bg-paperWhite";
+  const brandText = "text-pmDeep";
+  const subtitleText = "text-coolGray";
+  const navText = "text-pmDeep/80";
+  const navActiveText = "text-freshCoral";
+  const actionBtn = "pm-btn-secondary min-w-[96px]";
+  const ordersBtn = "pm-btn-secondary";
+  const cartBtn = "relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-softGray bg-milkBlueLight text-pmDeep hover:bg-pastelCream";
 
   const handleLogout = async () => {
     try {
@@ -45,29 +46,39 @@ export default function Navbar() {
     }
   };
 
+  useEffect(() => {
+    const onScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${headerClasses}`}>
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6">
+    <header className={`sticky top-0 z-[1000] transition-all duration-300 ${headerClasses}`}>
+      <nav className="mx-auto flex h-[74px] max-w-6xl items-center justify-between px-4 md:h-[80px] md:px-5">
         <Link to="/" className="flex items-center gap-3">
           {useFallbackLogo ? (
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-pmDeep to-pmViolet ring-2 ring-pmGold/45">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-milkBlue ring-2 ring-white/45 md:h-11 md:w-11">
               <span className="text-xs font-extrabold text-white">PM</span>
             </div>
           ) : (
             <img
               src={logoImage}
               alt="PuneMilkman logo"
-              className="h-11 w-11 rounded-full bg-white/95 object-cover ring-2 ring-pmGold/45"
+              className="h-10 w-10 rounded-full bg-white/95 object-cover ring-2 ring-white/45 md:h-11 md:w-11"
               onError={() => setUseFallbackLogo(true)}
             />
           )}
           <div>
-            <p className={`text-lg font-bold ${brandText}`}>PuneMilkman</p>
+            <p className={`text-[1.7rem] font-extrabold tracking-tight ${brandText}`}>PuneMilkman</p>
             <p className={`text-xs ${subtitleText}`}>Pune, Maharashtra</p>
           </div>
         </Link>
 
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="hidden items-center gap-7 md:flex">
           {navItems.map((item) => {
             const isHashLocation = item.to.includes("#");
             const isActive = isHashLocation
@@ -79,11 +90,10 @@ export default function Navbar() {
                 key={item.label}
                 to={item.to}
                 className={({ isActive: activeFlag }) =>
-                  `group relative font-medium ${navText} ${activeFlag || isActive ? navActiveText : ""}`
+                  `pm-nav-link ${activeFlag || isActive ? `active ${navActiveText}` : navText}`
                 }
               >
                 {item.label}
-                <span className={`absolute -bottom-1 left-0 h-0.5 w-0 ${underlineColor} transition-all group-hover:w-full`} />
               </NavLink>
             );
           })}
@@ -105,7 +115,7 @@ export default function Navbar() {
               <Link to="/cart" className={cartBtn}>
                 <FiShoppingCart />
                 {count > 0 ? (
-                  <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-pmAccent px-1 text-xs font-bold text-pmDeep">
+                  <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-freshCoral px-1 text-xs font-bold text-white">
                     {count}
                   </span>
                 ) : null}
@@ -113,7 +123,7 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/45 bg-white/10 text-white transition hover:bg-white/20"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-softGray bg-milkBlueLight text-pmDeep transition hover:bg-pastelCream"
                 aria-label="logout"
               >
                 <FiLogOut />
@@ -122,20 +132,20 @@ export default function Navbar() {
           )}
         </div>
 
-        <button className="md:hidden" onClick={() => setOpen((v) => !v)} aria-label="menu toggle">
+        <button className="rounded-xl border border-softGray bg-milkBlueLight p-2 text-pmDeep transition hover:bg-pastelCream md:hidden" onClick={() => setOpen((v) => !v)} aria-label="menu toggle">
           {open ? <FiX size={24} /> : <FiMenu size={24} />}
         </button>
       </nav>
 
       {open ? (
-        <div className="border-t border-white/20 bg-pmDeep/85 px-4 pb-4 pt-2 backdrop-blur-md md:hidden">
+        <div className="border-t border-softGray bg-paperWhite px-4 pb-4 pt-3 md:hidden">
           <div className="flex flex-col gap-3">
             {navItems.map((item) => (
               <Link
                 key={item.label}
                 to={item.to}
                 onClick={() => setOpen(false)}
-                className="font-medium text-white/90"
+                className="rounded-lg px-1 py-1.5 text-sm font-medium text-pmDeep/90"
               >
                 {item.label}
               </Link>

@@ -193,7 +193,7 @@ export default function MySubscriptions() {
                 </div>
 
                 <div className="mt-3 flex items-center justify-between rounded-xl bg-white/70 p-3">
-                  <p className="text-lg font-bold text-pmDeep">INR {item.subscription_price}</p>
+                  <p className="text-lg font-bold text-pmDeep">Rs {item.subscription_price}</p>
                   <label className="inline-flex items-center gap-2 text-sm text-pmDeep">
                     <input
                       type="checkbox"
@@ -218,7 +218,7 @@ export default function MySubscriptions() {
       {!loading && subscriptions.length > 0 ? (
         <section className="rounded-2xl border border-white/45 bg-white/55 p-5 shadow-soft backdrop-blur-md">
           <h2 className="text-2xl font-bold text-pmDeep">Confirmation</h2>
-          <p className="mt-1 text-sm text-pmDeep/70">Selected plans: {selectedIds.length} • Total: INR {selectedAmount}</p>
+          <p className="mt-1 text-sm text-pmDeep/70">Selected plans: {selectedIds.length} • Total: Rs {selectedAmount}</p>
 
           <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
             <select
