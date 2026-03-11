@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import MySubscriptions from "./pages/MySubscriptions";
+import ProductDetailPage from "./pages/ProductDetailPage";
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/products" element={<Products />} />
+        <Route path="/product/:productId" element={<ProductDetailPage />} />
         <Route path="/subscription" element={<Subscription />} />
         <Route path="/login" element={<Login />} />
         <Route path="/cart" element={<Cart />} />

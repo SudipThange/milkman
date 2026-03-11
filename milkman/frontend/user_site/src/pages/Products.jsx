@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FiChevronLeft, FiChevronRight, FiRotateCcw } from "react-icons/fi";
 import ProductCard from "../components/ProductCard";
@@ -71,6 +71,7 @@ function buildPageItems(currentPage, totalPages) {
 
 export default function Products() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isLoggedIn } = useAuth();
   const { addItem } = useCart();
   const [products, setProducts] = useState([]);
@@ -80,6 +81,13 @@ export default function Products() {
   const [priceRange, setPriceRange] = useState({ min: 0, max: 0 });
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const statePage = Number(location.state?.page);
+    if (Number.isInteger(statePage) && statePage > 0) {
+      setCurrentPage(statePage);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     const load = async () => {
@@ -211,7 +219,7 @@ export default function Products() {
 
   const handleAddToCart = (product) => {
     if (!isLoggedIn) {
-      navigate("/login", { state: { from: "/products" } });
+      navigate(`/login?redirect=${encodeURIComponent(`/product/${product.id}`)}&addToCart=true&page=${currentPage}`);
       return;
     }
     addItem(product);
@@ -348,7 +356,11 @@ export default function Products() {
               <div className="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
                 {paginatedProducts.map((product) => (
                   <div key={product.id}>
-                    <ProductCard product={product} onAddToCart={handleAddToCart} />
+                    <ProductCard
+                      product={product}
+                      onAddToCart={handleAddToCart}
+                      currentPage={currentPage}
+                    />
                   </div>
                 ))}
               </div>

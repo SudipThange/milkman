@@ -18,6 +18,24 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const getPostLoginPath = () => {
+    const searchParams = new URLSearchParams(location.search);
+    const redirectPath = searchParams.get("redirect");
+    const addToCart = searchParams.get("addToCart") === "true";
+    const page = searchParams.get("page");
+
+    if (redirectPath && redirectPath.startsWith("/")) {
+      const redirectParams = new URLSearchParams();
+      if (addToCart) redirectParams.set("addToCart", "true");
+      if (page) redirectParams.set("page", page);
+
+      const query = redirectParams.toString();
+      return query ? `${redirectPath}?${query}` : redirectPath;
+    }
+
+    return location.state?.from || "/";
+  };
+
   const buildUsernameFromEmail = (rawEmail) => {
     const [localPart = ""] = rawEmail.split("@");
     const safeLocalPart = localPart
@@ -43,8 +61,7 @@ export default function Login() {
       try {
         const data = await loginRequest(api, { email, password });
         login(data.token);
-        const nextPath = location.state?.from || "/";
-        navigate(nextPath);
+        navigate(getPostLoginPath(), { replace: true });
       } catch (err) {
         setError(getApiErrorMessage(err, "Invalid credentials"));
       } finally {
@@ -59,8 +76,7 @@ export default function Login() {
 
       const data = await loginRequest(api, { email, password });
       login(data.token);
-      const nextPath = location.state?.from || "/";
-      navigate(nextPath);
+      navigate(getPostLoginPath(), { replace: true });
     } catch (err) {
       setError(getApiErrorMessage(err, "Unable to register. Please try again."));
     } finally {
