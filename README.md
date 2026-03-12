@@ -98,6 +98,60 @@ npm install
 npm run dev
 ```
 
+## Run All Services With PM2
+
+This repository now includes a root PM2 ecosystem file: `ecosystem.config.cjs`.
+
+Managed apps:
+
+- `milkman-backend` (Django on `0.0.0.0:8000`)
+- `milkman-admin-site` (Vite dev server on `0.0.0.0:5174`)
+- `milkman-user-site` (Vite dev server on `0.0.0.0:5173`)
+
+### 1. Prerequisites
+
+- Create and activate the project virtual environment (`.venv`)
+- Install backend dependencies (`pip install -r requirements.txt`)
+- Install frontend dependencies in both frontend apps (`npm install`)
+- Install PM2 globally:
+
+```bash
+npm install -g pm2
+```
+
+### 2. Start all apps with PM2
+
+From repository root (`D:\FullStackProject`):
+
+```bash
+pm2 start ecosystem.config.cjs
+pm2 status
+```
+
+### 3. Useful PM2 commands
+
+```bash
+pm2 logs
+pm2 logs milkman-backend
+pm2 restart milkman-backend
+pm2 restart milkman-admin-site
+pm2 restart milkman-user-site
+pm2 stop all
+pm2 delete all
+```
+
+### 4. Persist processes across reboot
+
+```bash
+pm2 save
+pm2 startup
+```
+
+Notes:
+
+- Backend uses the project virtualenv Python (`.venv/Scripts/python.exe` on Windows, `.venv/bin/python` on macOS/Linux).
+- Frontends run via `npm run dev` with fixed ports and `--strictPort`.
+
 ## Authentication Model
 
 - Login endpoint: `POST /user/login/`
