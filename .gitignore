@@ -12,7 +12,7 @@ env/
 
 # Environment files
 .env
-.env.*
+.env.*VITE_API_BASE_URL=http://4.240.80.29/api
 !.env.example
 
 # Django
